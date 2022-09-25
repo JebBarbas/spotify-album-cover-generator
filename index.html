@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="./js/croppr.min.js"></script>
+
+    <link rel="stylesheet" href="./css/pico.min.css">
+    <link rel="stylesheet" href="./css/croppr.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <title>Cover Photo Generator</title>
+</head>
+<body>
+    <main class="container">
+        <hgroup>
+            <h1>Generador de covers de albúm para Spotify</h1>
+            <h5>Developed by: @jebbarbas</h3>
+        </hgroup>
+
+        <article>
+            <label for="btnSelectPhoto">
+                1. Selecciona la foto:<span class="required"/>
+            </label>
+            <input type="file" id="btnSelectPhoto">
+
+            <label for="txtName">
+                2. Escribe el texto de la foto:<span class="required"/>
+            </label>
+            <input type="text" id="txtName">
+            <small>
+                Este será también el nombre del archivo al descargar.
+            </small>
+
+            <label for="dialogColor">
+                3. Escoge el color de las tiras:<span class="required"/>
+            </label>
+            <input type="color" id="dialogColor" value="#FFFFFF">
+
+            <label for="dialogText">
+                4. Escoge el color del texto:<span class="required"/>
+            </label>
+            <input type="color" id="dialogText" value="#FFFFFF">
+
+            <fieldset class="avoidOverflow">
+                <details>
+                    <summary>
+                        5. Recorta la foto:
+                    </summary>
+                    <div id="divEditor"></div>
+                </details>
+                <small>Abre para poder editar tu foto (agrandar/achicar/mover).</small>
+            </fieldset>
+
+            <fieldset class="avoidOverflow">
+                <label>
+                    6. Mira la vista previa:
+                </label>
+                <div id="canvasDiv" class="hidden">
+                    <canvas id="canvasPreview"></canvas>
+                </div>
+            </fieldset>
+
+            <footer>
+                <label for="btnDownload">
+                    7. Descarga tu nueva cover para tu albúm:
+                </label>
+                <button type="button" id="btnDownload" disabled>DESCARGAR</button>
+                <small>
+                    Procura presionar este botón para descargar tu imagen en vez de guardar o copiar
+                    la imagen proporcionada arriba, ya que esta se encuentra en formato PNG, y las imágenes
+                    que subes a Spotify necesitan estar en formato JPG.
+                </small>
+            </footer>
+        </article>
+        <dialog id="modal">
+            <article>
+                <p id="modalText"></p>
+                <footer>
+                    <button id="btnCloseModal" class="outline">OK</button>
+                </footer>
+            </article>
+        </dialog>
+    </main>
+    <script src="./js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+@font-face {
+    font-family: gotham;
+    src: url("../fonts/GothamMedium.ttf");
+}
+
+:root {
+    --primary: crimson;
+}
+
+* {
+    font-family: gotham;
+}
+
+#divEditor, .croppr-container {
+    width: auto;
+    display: block;
+    margin: auto;
+}
+
+#canvasPreview {
+    display: block;
+    margin: auto;
+}
+
+.avoidOverflow {
+    max-width: 100vw;
+}
+
+.hidden {
+    display: none;
+}
+
+span.required::after {
+    content: "*";
+    color: crimson;
+}
