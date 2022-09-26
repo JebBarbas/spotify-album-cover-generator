@@ -15,7 +15,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
     let lineArray = []; // This is an array of lines, which the function will return
 
     // Lets iterate over each word
-    for(var n = 0; n < words.length; n++) {
+    for(let n = 0; n < words.length; n++) {
         // Create a test line, and measure it..
         testLine += `${words[n]} `;
         let metrics = ctx.measureText(testLine);
@@ -93,6 +93,11 @@ function main(){
     */
     const ctx = canvasPreview.getContext('2d')
 
+    /** Switch que da la opción de mostrar el logo del desarrollador
+     * @type { HTMLInputElement }
+    */
+     const chkMostrarLogo = document.getElementById('chkMostrarLogo')
+
     /** Botón de descarga de la imagen final 
      * @type { HTMLButtonElement }
     */
@@ -114,13 +119,49 @@ function main(){
     /** Imagen cortada (en caso de que aun no se recorte nada, será null) */
     let cuttedImage = null
 
+    /** Muestra si hay un cover mostrandose actualmente */
+    let showingCover = false
+
+    /** Flag que guarda si hay cambios sin guardar */
+    let changes = false
+
     // Eventos para que se dibuje la imagen en cada cambio
     btnSelectPhoto.addEventListener('change', openCropEditor)
     txtName.addEventListener('input', drawImage)
     dialogColor.addEventListener('change', drawImage)
     dialogText.addEventListener('change', drawImage)
+    chkMostrarLogo.addEventListener('change', drawImage)
     btnDownload.addEventListener('click', downloadImg)
     btnCloseModal.addEventListener('click', () => modal.close())
+
+    /** Evitar salir sin que pierdas los cambios */
+    window.addEventListener('beforeunload', e => {
+        if (changes) {
+            e.preventDefault();
+            e.returnValue = '';
+            return;
+        }
+    
+        delete e['returnValue'];
+    })
+
+    /** Cambia el titulo para mostrar (u ocultar) la leyenda de cambios sin guardar
+     * Además cambia la flag
+     */
+    function setChanges(newValue){
+        if(newValue !== changes){
+            const title = 'Generador de Covers para Álbumes'
+            
+            if(newValue){
+                document.title = `✏ ${title} (cambios sin guardar)`
+                changes = true
+            }
+            else{
+                document.title = title
+                changes = false
+            }
+        }
+    }
 
     /** Metodo para descargar la imagen */
     function downloadImg(){
@@ -134,6 +175,9 @@ function main(){
         enlace.href = canvasPreview.toDataURL("image/jpeg", 1);
         // Hacer click en él
         enlace.click();
+
+        // Ya no hay cambios sin guardar
+        setChanges(false)
     }
 
     /** Método que abre el editor con la imagen seleccionada */
@@ -141,11 +185,14 @@ function main(){
         // Obtiene la imagen
         imageURL = URL.createObjectURL(e.target.files[0]);
 
+        // Se ha puesto la imagen, por lo tanto, ya hay una
+        showingCover = true
+
         // Al cambiar de imagen, la imagen cortada desaparece, y se coloca el
         // cuadrado más facil de la nueva en el canvas
         cuttedImage = null
         drawImage()
-    
+
         // Borra editor en caso que existiera una imagen previa
         divEditor.innerHTML = '';
 
@@ -169,6 +216,9 @@ function main(){
 
     /** Método que dibuja la imagen, ya sea */
     function drawImage() {
+        // Ahora hay cambios sin guardar
+        setChanges(true)
+
         // Limpia la previa en caso que existiera algún elemento previo
         ctx.clearRect(0, 0, canvasPreview.width, canvasPreview.height);
 
@@ -217,8 +267,14 @@ function main(){
             newImage.src = imageURL
         }
 
-        document.getElementById('canvasDiv').classList.remove('hidden')
-        btnDownload.disabled = false
+        // Si hay cover ya muestralo, sino (por ejemplo, si solo se cambió el color desde un inicio)
+        // entonces no
+        if(showingCover){
+            document.querySelectorAll('.temporalHidden').forEach(element => 
+                element.classList.remove('temporalHidden')
+            )
+            btnDownload.disabled = false
+        }
     }
 
     /** Funcion que dibuja las lineas y el texto en el canvas */
@@ -258,8 +314,30 @@ function main(){
         wrappedText.forEach(line => {
             ctx.fillText(line[0], line[1], line[2] - TEXT_HEIGHT + sideHeight)
         })
+
+        drawLogo()
     }
     
+    /** Funcion que dibuja mi logo en el canvas */
+    function drawLogo(){
+        const shouldDraw = chkMostrarLogo.checked
+        
+        if(shouldDraw){
+            // Se crea tambien la imagen que es del logo y se pone chiquita arriba
+            const miniLogo = new Image()
+            miniLogo.onload = function(){
+                const LOGO_PADDING_PERCENTAGE = 2.5
+                const LOGO_SIZE_PERCENTAGE = 10
+
+                const REAL_LOGO_PADDING = (LOGO_PADDING_PERCENTAGE * canvasPreview.width) / 100
+                const REAL_LOGO_SIZE = (LOGO_SIZE_PERCENTAGE * canvasPreview.width) / 100
+
+                ctx.drawImage(miniLogo, REAL_LOGO_PADDING, REAL_LOGO_PADDING, REAL_LOGO_SIZE, REAL_LOGO_SIZE)
+                //, 0, 0, REAL_LOGO_SIZE, REAL_LOGO_SIZE)
+            }
+            miniLogo.src = './img/jebfire_mc.png'
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', main)

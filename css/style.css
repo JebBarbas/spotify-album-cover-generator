@@ -4,7 +4,7 @@
 }
 
 :root {
-    --primary: crimson;
+    --primary: #dc143c;
 }
 
 * {
@@ -22,11 +22,39 @@
     margin: auto;
 }
 
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+@media only screen and (min-width: 767px) {
+    .md-flex-row {
+        flex-direction: row;
+    }
+
+}
+
+.logo {
+    width: 5rem;
+    place-self: center;
+}
+
 .avoidOverflow {
     max-width: 100vw;
 }
 
-.hidden {
+.temporalHidden {
     display: none;
 }
 

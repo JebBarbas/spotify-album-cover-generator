@@ -10,16 +10,27 @@
     <link rel="stylesheet" href="./css/pico.min.css">
     <link rel="stylesheet" href="./css/croppr.min.css">
     <link rel="stylesheet" href="./css/style.css">
-    <title>Cover Photo Generator</title>
+
+    <link rel="icon" href="./img/favicon.ico" type="image/x-icon">
+
+    <title>Generador de Covers para Álbumes</title>
 </head>
 <body>
     <main class="container">
-        <hgroup>
-            <h1>Generador de covers de albúm para Spotify</h1>
-            <h5>Developed by: @jebbarbas</h3>
-        </hgroup>
+        <div class="flex gap-4 flex-col md-flex-row">
+            <div class="flex justify-center">
+                <img src="./img/jebfire.png" alt="logo de jebbarbas" class="logo">  
+            </div>              
+            <div class="headings">
+                <h1>Generador de covers para álbumes de Spotify</h1>
+                <h6>Desarrollado por: <a href="https://github.com/JebBarbas">@jebbarbas</a></h6>
+            </div>
+        </div>
 
         <article>
+            <header>
+                Rellena los siguientes campos para generar tu cover:
+            </header>
             <label for="btnSelectPhoto">
                 1. Selecciona la foto:<span class="required"/>
             </label>
@@ -33,36 +44,52 @@
                 Este será también el nombre del archivo al descargar.
             </small>
 
-            <label for="dialogColor">
-                3. Escoge el color de las tiras:<span class="required"/>
-            </label>
-            <input type="color" id="dialogColor" value="#FFFFFF">
+            <div class="grid">
+                <div>
+                    <label for="dialogColor">
+                        3. Escoge el color de las tiras:<span class="required"/>
+                    </label>
+                    <input type="color" id="dialogColor" value="#FFFFFF">
+                </div>
+                <div>
+                    <label for="dialogText">
+                        4. Escoge el color del texto:<span class="required"/>
+                    </label>
+                    <input type="color" id="dialogText" value="#FFFFFF">
+                </div>
+            </div>
 
-            <label for="dialogText">
-                4. Escoge el color del texto:<span class="required"/>
-            </label>
-            <input type="color" id="dialogText" value="#FFFFFF">
-
-            <fieldset class="avoidOverflow">
+            <fieldset class="avoidOverflow temporalHidden">
                 <details>
                     <summary>
-                        5. Recorta la foto:
+                        <em data-tooltip="Haz clic para abrir el editor">
+                            5. Recorta la foto:
+                        </em>
                     </summary>
                     <div id="divEditor"></div>
                 </details>
                 <small>Abre para poder editar tu foto (agrandar/achicar/mover).</small>
             </fieldset>
 
-            <fieldset class="avoidOverflow">
+            <fieldset class="avoidOverflow temporalHidden">
                 <label>
                     6. Mira la vista previa:
                 </label>
-                <div id="canvasDiv" class="hidden">
-                    <canvas id="canvasPreview"></canvas>
-                </div>
+                <canvas id="canvasPreview"></canvas>
             </fieldset>
 
-            <footer>
+            <fieldset class="temporalHidden">
+                <label for="chkMostrarLogo">
+                    <input type="checkbox" role="switch" id="chkMostrarLogo" checked>
+                    Mostrar Logo del Desarrollador
+                </label>
+                <small>
+                    Puedes desactivar esta casilla si no quieres que se vea mi logo en tu cover, sin
+                    embargo, un gatito recién nacido muere cada vez que lo haces😭.
+                </small>
+            </fieldset>
+        
+            <footer class="temporalHidden">
                 <label for="btnDownload">
                     7. Descarga tu nueva cover para tu albúm:
                 </label>
@@ -76,7 +103,10 @@
         </article>
         <dialog id="modal">
             <article>
-                <p id="modalText"></p>
+                <p id="modalText">
+                    Puse este modal aquí pero no lo uso en ningún lugar (aún), así que creo que es una
+                    especie de easter egg(?).
+                </p>
                 <footer>
                     <button id="btnCloseModal" class="outline">OK</button>
                 </footer>
