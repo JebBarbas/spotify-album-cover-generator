@@ -254,7 +254,7 @@ function drawLogo(canvas, ctx){
     
     if(shouldDraw){
         // Se crea tambien la imagen que es del logo y se pone chiquita arriba
-        createImg( './public/img/jebfire_mc.png', image => {
+        createImg( './assets/img/jebfire_mc.png', image => {
             const LOGO_PADDING_PERCENTAGE = 2.5
             const LOGO_SIZE_PERCENTAGE = 10
 
