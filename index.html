@@ -5,49 +5,68 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="./js/croppr.min.js"></script>
+    <!-- Primary Meta Tags -->
+    <title>Generador de Covers para Spotify</title>
+    <meta name="title" content="Generador de Covers para Spotify">
+    <meta name="description" content="Crea covers como los que tiene Spotify en sus playlist con tus propias fotos y preferencias de colores.">
 
-    <link rel="stylesheet" href="./css/pico.min.css">
-    <link rel="stylesheet" href="./css/pico.customize.css">
-    <link rel="stylesheet" href="./css/croppr.min.css">
-    <link rel="stylesheet" href="./css/style.css">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://spotify-album-cover-generator.vercel.app/">
+    <meta property="og:title" content="Generador de Covers para Spotify">
+    <meta property="og:description" content="Crea covers como los que tiene Spotify en sus playlist con tus propias fotos y preferencias de colores.">
+    <meta property="og:image" content="https://spotify-album-cover-generator.vercel.app/public/img/cover-photo.jpg">
 
-    <link rel="icon" href="./img/favicon.ico" type="image/x-icon">
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://spotify-album-cover-generator.vercel.app/">
+    <meta property="twitter:title" content="Generador de Covers para Spotify">
+    <meta property="twitter:description" content="Crea covers como los que tiene Spotify en sus playlist con tus propias fotos y preferencias de colores.">
+    <meta property="twitter:image" content="https://spotify-album-cover-generator.vercel.app/public/img/cover-photo.jpg">
 
-    <title>Generador de Covers para Álbumes</title>
+    <script src="./public/js/croppr.min.js"></script>
+
+    <link rel="stylesheet" href="./public/css/pico.min.css">
+    <link rel="stylesheet" href="./public/css/pico.customize.css">
+    <link rel="stylesheet" href="./public/css/croppr.min.css">
+    <link rel="stylesheet" href="./public/css/style.css">
+
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+
+    <title>Generador de Covers para Spotify</title>
 </head>
 <body>
     <main class="container">
         <div class="flex gap-4 flex-col md-flex-row">
             <div class="flex justify-center">
-                <img src="./img/jebfire.png" alt="logo de jebbarbas" class="logo">  
+                <img src="./public/img/jebfire.png" alt="logo de jebbarbas" class="logo">  
             </div>              
             <div class="headings">
-                <h1>Generador de covers para álbumes de Spotify</h1>
-                <h6>Desarrollado por: <a href="https://github.com/JebBarbas">@jebbarbas</a></h6>
+                <h1 class="text-center">Generador de covers para álbumes de Spotify</h1>
+                <h6 class="text-center">Desarrollado por: <a href="https://github.com/JebBarbas">@jebbarbas</a></h6>
             </div>
         </div>
 
-        <article>
-            <header>
-                Rellena los siguientes campos para generar tu cover:
-            </header>
+        <fieldset>
+            Rellena los siguientes campos para generar tu cover:
+        </fieldset>
 
-            <fieldset id="widthReference">
-                <label>
-                    1. Selecciona la foto:<span class="required"/>
-                </label>
-                <div class="dropzone" id="dropzone">
-                    <div>
-                        <h2 class="m-0" id="lblDrop">Arrastra y suelta imágenes</h2>
-                        <div>O</div>
-                    </div>
-                    <button id="btnSelectPhoto">Selecciona tus archivos</button>
-                    <input type="file" id="fileDialog" hidden>
-                </div>  
-                <small id="errorTooltip" class="error-tooltip"></small>           
-            </fieldset>
+        <fieldset id="widthReference">
+            <label>
+                1. Selecciona la foto:<span class="required"/>
+            </label>
+            <div class="dropzone" id="dropzone">
+                <div>
+                    <h2 class="m-0" id="lblDrop">Arrastra y suelta imágenes</h2>
+                    <div>O</div>
+                </div>
+                <button id="btnSelectPhoto">Selecciona tu archivo</button>
+                <input type="file" id="fileDialog" hidden accept="image/*">
+            </div>  
+            <small id="errorTooltip" class="error-tooltip"></small>           
+        </fieldset>
 
+        <fieldset class="temporalHidden">
             <label for="txtName">
                 2. Escribe el texto de la foto:<span class="required"/>
             </label>
@@ -55,77 +74,75 @@
             <small>
                 Este será también el nombre del archivo al descargar.
             </small>
-
-            <div class="grid">
-                <div>
-                    <label for="dialogColor">
-                        3. Escoge el color de las barras:<span class="required"/>
-                    </label>
-                    <input type="color" id="dialogColor" value="#FFFFFF">
-                    <button id="sameAsText">Igual al texto</button>
-                </div>
-                <div>
-                    <label for="dialogText">
-                        4. Escoge el color del texto:<span class="required"/>
-                    </label>
-                    <input type="color" id="dialogText" value="#FFFFFF">
-                    <button id="sameAsColor">Igual a las barras</button>
-                </div>
-            </div>
-
-            <fieldset class="temporalHidden">
-                <details>
-                    <summary>
-                        <em data-tooltip="Haz clic para abrir el editor">
-                            5. Recorta la foto:
-                        </em>
-                    </summary>
-                    <div id="divEditor"></div>
-                </details>
-                <small>Abre para poder editar tu foto (agrandar/achicar/mover).</small>
-            </fieldset>
-
-            <fieldset class="temporalHidden">
-                <label>
-                    6. Mira una previsualización:
-                </label>
-                <canvas id="canvasResult"></canvas>
-                <small class="only-small">
-                    En este dispositivo, la imagen superior puede verse diferente al resultado
-                    final, ya que tu pantalla tiene un ancho menor a 300px, por lo que la imagen
-                    final se agrandará hasta este tamaño, que es el minimo que requiere 
-                    Spotify.
-                </small>
-            </fieldset>
-
-            <fieldset class="temporalHidden">
-                <label for="chkMostrarLogo">
-                    <input type="checkbox" role="switch" id="chkMostrarLogo" checked>
-                    Mostrar Logo del Desarrollador
-                </label>
-                <small>
-                    Puedes desactivar esta casilla si no quieres que se vea mi logo en tu cover, sin
-                    embargo, un gatito recién nacido muere cada vez que lo haces😭.
-                </small>
-            </fieldset>
+        </fieldset>
         
-            <footer class="temporalHidden">
-                <label for="btnDownload">
-                    7. Descarga tu nueva cover para tu albúm:
+        <fieldset class="grid temporalHidden">
+            <div>
+                <label for="dialogColor">
+                    3. Escoge el color de las barras:<span class="required"/>
                 </label>
-                <button type="button" id="btnDownload" disabled>DESCARGAR</button>
-                <small>
-                    Procura presionar este botón para descargar tu imagen en vez de guardar 
-                    o copiar la imagen proporcionada arriba, ya que esta se encuentra en 
-                    formato PNG, y las imágenes que subes a Spotify necesitan estar en formato JPG. Además de que, dependiendo de la imagen seleccionada, esta puede necesitar un cambio de tamaño.
-                </small>
-            </footer>
-        </article>
+                <input type="color" id="dialogColor" value="#FFFFFF">
+                <button id="sameAsText">Igual al texto</button>
+            </div>
+            <div>
+                <label for="dialogText">
+                    4. Escoge el color del texto:<span class="required"/>
+                </label>
+                <input type="color" id="dialogText" value="#FFFFFF">
+                <button id="sameAsColor">Igual a las barras</button>
+            </div>
+        </fieldset>
+
+        <fieldset class="temporalHidden">
+            <details>
+                <summary>
+                    <em data-tooltip="Haz clic para abrir el editor">
+                        5. Recorta la foto:
+                    </em>
+                </summary>
+                <div id="divEditor"></div>
+            </details>
+            <small>Abre para poder editar tu foto (agrandar/achicar/mover).</small>
+        </fieldset>
+
+        <fieldset class="temporalHidden">
+            <label>
+                6. Mira una previsualización:
+            </label>
+            <canvas id="canvasPreview"></canvas>
+            <canvas id="canvasResult"></canvas>
+        </fieldset>
+
+        <fieldset class="temporalHidden">
+            <label for="chkMostrarLogo">
+                <input type="checkbox" role="switch" id="chkMostrarLogo" checked>
+                Mostrar Logo del Desarrollador
+            </label>
+            <p class="text-justify small">
+                Puedes desactivar esta casilla si no quieres que se vea mi logo en tu cover, sin
+                embargo, un gatito recién nacido muere cada vez que lo haces😭.
+            </p>
+        </fieldset>
+    
+        <fieldset class="temporalHidden">
+            <label for="btnDownload">
+                7. Descarga tu nueva cover para tu albúm:
+            </label>
+            <button type="button" id="btnDownload" disabled>DESCARGAR</button>
+            <p class="text-justify small">
+                Procura presionar este botón para descargar tu imagen en vez de guardar 
+                o copiar la imagen proporcionada arriba, ya que esta se encuentra en 
+                formato PNG, y las imágenes que subes a Spotify necesitan estar en formato JPG. Además de que, dependiendo de la imagen seleccionada, esta puede necesitar un cambio de tamaño.
+            </p>
+        </fieldset>
+
+        <small id="copy"></small>
+
         <dialog id="modal">
             <article>
                 <p id="modalText">
-                    Puse este modal aquí pero no lo uso en ningún lugar (aún), así que creo que es una
-                    especie de easter egg(?).
+                    Puse este modal aquí pero no lo uso en ningún lugar (aún), así que creo que es
+                    una especie de easter egg(?).
                 </p>
                 <footer>
                     <button id="btnCloseModal" class="outline">OK</button>
@@ -133,6 +150,6 @@
             </article>
         </dialog>
     </main>
-    <script src="./js/main.js" type="module"></script>
+    <script src="./public/js/main.js" type="module"></script>
 </body>
 </html>

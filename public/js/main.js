@@ -1,7 +1,7 @@
 // @ts-check
 
-import { wrapText, slugifyName, element, isValidFile } from "./utils.js";
-import { useCanvas, useInput, useButton, useCanvasSide, setCanvasSide } from "./useElements.js";
+import { wrapText, slugifyName, element, isValidFile, allElements, setCopyright } from "./utils.js";
+import { usePreviewCanvas, useRealCanvas, useInput, useButton, useCanvasSide, setCanvasSide, useRealCanvasSize } from "./useElements.js";
 
 // Global Variables //
 /** URL de la imagen */
@@ -23,7 +23,7 @@ let changes = false
 */
 function setChanges(newValue){
     if(newValue !== changes){
-        const title = 'Generador de Covers para Álbumes'
+        const title = 'Generador de Covers para Spotify'
         
         if(newValue){
             document.title = `✏ ${title} (cambios sin guardar)`
@@ -41,7 +41,7 @@ function setChanges(newValue){
  */
 function downloadImg(){
     const txtName = useInput('#txtName')
-    const [canvasResult] = useCanvas()
+    const [canvasResult] = useRealCanvas()
 
     const name = slugifyName(txtName.value)
     
@@ -79,7 +79,7 @@ function openCropEditor(file){
     // Al cambiar de imagen, la imagen cortada desaparece, y se coloca el
     // cuadrado más facil de la nueva en el canvas
     cuttedImage = null
-    drawImage()
+    drawImage(true)
 
     // Borra editor en caso que existiera una imagen previa
     divEditor.innerHTML = '';
@@ -99,7 +99,7 @@ function openCropEditor(file){
         startSize: [70, 70],
         onCropEnd: function(data){
             cuttedImage = data
-            drawImage()
+            drawImage(true)
         }
     })
 }
@@ -118,55 +118,67 @@ function createImg(src, onLoad){
 /** 
  * Función que activa el arbol de dibujo, dibujando primeramente la imagen y mandando a 
  * llamar a la función que dibuja las lineas
+ * @param {boolean} withChange - Indicates if the changes flag will change (useful on sesize)
  */
-function drawImage() {
-    const [canvasResult, ctx] = useCanvas()
+function drawImage(withChange) {
+    const [canvasPreview, ctxPreview] = usePreviewCanvas()
+    const [canvasResult, ctxResult] = useRealCanvas()
+
     const btnDownload = useButton('#btnDownload')
     
     // Ahora hay cambios sin guardar
-    setChanges(true)
+    withChange && setChanges(true)
 
     // Limpia la previa en caso que existiera algún elemento previo
-    ctx.clearRect(0, 0, canvasResult.width, canvasResult.height);
+    ctxPreview.clearRect(0, 0, canvasPreview.width, canvasPreview.height)
+    ctxResult.clearRect(0, 0, canvasResult.width, canvasResult.height)
+
+    // Tamaños a usar
+    const sideLength = useCanvasSide()
+    const realSideLength = useRealCanvasSize()
+
+    // Adecuo el canvas de preview y el de resultados
+    canvasPreview.width = sideLength
+    canvasPreview.height = sideLength
+
+    canvasResult.width = realSideLength
+    canvasResult.height = realSideLength
 
     // Si existe una imagen cortada, hace operaciones con ella
     if(cuttedImage){
         // Variables
-        const sideLength = useCanvasSide()
         const {x, y, width, height} = cuttedImage
     
-        // Adecuo el canvas
-        canvasResult.width = sideLength;
-        canvasResult.height = sideLength;
-
-        // Creamos una nueva imagen que será la del canvas
+        // Creamos una nueva imagen que será la del canvas, tanto en real como preview
         createImg(imageURL, image => {
             // Se pega en el canvas la imagen recortada y se dibujan las lineas
-            ctx.drawImage(image, x, y, width, height, 0, 0, sideLength, sideLength);
-            drawLines()
+            ctxPreview.drawImage(image, x, y, width, height, 0, 0, sideLength, sideLength);
+            ctxResult.drawImage(image, x, y, width, height, 0, 0, realSideLength, realSideLength);
+
+            drawLines(canvasPreview, ctxPreview)
+            drawLines(canvasResult, ctxResult)
         })
     }
     // Si no, entonces las hace con el cuadrado más fácil
     else{
         createImg(imageURL, image => {
-            const sideLength = useCanvasSide()
             const imageSide = Math.min(image.width, image.height)
-
-            canvasResult.width = sideLength
-            canvasResult.height = sideLength
 
             const sx = (image.width / 2) - (imageSide / 2)
             const sy = (image.height / 2) - (imageSide / 2)
 
-            ctx.drawImage(image, sx, sy, imageSide, imageSide, 0, 0, sideLength, sideLength)
-            drawLines()
+            ctxPreview.drawImage(image, sx, sy, imageSide, imageSide, 0, 0, sideLength, sideLength)
+            ctxResult.drawImage(image, sx, sy, imageSide, imageSide, 0, 0, realSideLength, realSideLength)
+            
+            drawLines(canvasPreview, ctxPreview)
+            drawLines(canvasResult, ctxResult)
         })
     }
 
     // Si hay cover ya muestralo, sino (por ejemplo, si solo se cambió el color desde un inicio)
     // entonces no
     if(showingCover){
-        document.querySelectorAll('.temporalHidden').forEach(hiddenElement => 
+        allElements('.temporalHidden').forEach(hiddenElement => 
             hiddenElement.classList.remove('temporalHidden')
         )
         btnDownload.disabled = false
@@ -174,42 +186,44 @@ function drawImage() {
 }
 
 /** 
- * Funcion que dibuja las lineas en el canvas y llama a la función que dibuja el texto
+ * Funcion que dibuja las lineas en el canvas dado y llama a la función que dibuja el texto
+ * @param {HTMLCanvasElement} canvas - The canvas where to draw the lines
+ * @param {CanvasRenderingContext2D} ctx - The 2D context of the canvas
  */
-function drawLines(){
-    const [canvasResult, ctx] = useCanvas()
+function drawLines(canvas, ctx){
     const dialogColor = useInput('#dialogColor')
 
     const BOTTOM_LINE_HEIGHT_PERCENTAGE = 5
     const SIDE_LINE_HEIGHT_PERCENTAGE = 15
 
-    const REAL_BOTTOM_HEIGHT = (BOTTOM_LINE_HEIGHT_PERCENTAGE * canvasResult.height) / 100
-    const REAL_SIDE_HEIGHT = (SIDE_LINE_HEIGHT_PERCENTAGE * canvasResult.height) / 100
+    const REAL_BOTTOM_HEIGHT = (BOTTOM_LINE_HEIGHT_PERCENTAGE * canvas.height) / 100
+    const REAL_SIDE_HEIGHT = (SIDE_LINE_HEIGHT_PERCENTAGE * canvas.height) / 100
 
     // El ancho de la tira del lado será igual que el alto de la de abajo
     const REAL_SIDE_WIDTH = REAL_BOTTOM_HEIGHT
 
-    const BOTTOM_LINE_START = canvasResult.height - REAL_BOTTOM_HEIGHT
-    const SIDE_LINE_START = canvasResult.height - 2.5*REAL_BOTTOM_HEIGHT - REAL_SIDE_HEIGHT
+    const BOTTOM_LINE_START = canvas.height - REAL_BOTTOM_HEIGHT
+    const SIDE_LINE_START = canvas.height - 2.5*REAL_BOTTOM_HEIGHT - REAL_SIDE_HEIGHT
 
     ctx.fillStyle = dialogColor.value
 
-    ctx.fillRect(0, BOTTOM_LINE_START, canvasResult.width, REAL_BOTTOM_HEIGHT)
+    ctx.fillRect(0, BOTTOM_LINE_START, canvas.width, REAL_BOTTOM_HEIGHT)
     ctx.fillRect(0, SIDE_LINE_START, REAL_SIDE_WIDTH, REAL_SIDE_HEIGHT)
 
     // Inicia a la misma altura que la linea de al lado y al final de esta (más un margen de la misma anchura)
-    writeText(2*REAL_SIDE_WIDTH, SIDE_LINE_START, REAL_SIDE_HEIGHT*0.60, REAL_SIDE_HEIGHT)
+    writeText(canvas, ctx, 2*REAL_SIDE_WIDTH, SIDE_LINE_START, REAL_SIDE_HEIGHT*0.60, REAL_SIDE_HEIGHT)
 }
 
 /** 
  * Función que dibuja el texto en el canvas y manda a llamar a la función para dibujar el logo
+ * @param {HTMLCanvasElement} canvas
+ * @param {CanvasRenderingContext2D} ctx
  * @param {number} startXPosition
  * @param {number} startYPosition
  * @param {number} textHeight
  * @param {number} sideHeight
 */
-function writeText(startXPosition, startYPosition, textHeight, sideHeight){
-    const [canvasResult, ctx] = useCanvas()
+function writeText(canvas, ctx, startXPosition, startYPosition, textHeight, sideHeight){
     const txtName = useInput('#txtName')
     const dialogText = useInput('#dialogText')
     
@@ -218,7 +232,7 @@ function writeText(startXPosition, startYPosition, textHeight, sideHeight){
     ctx.fillStyle = dialogText.value
     ctx.font = `bold ${textHeight}px gotham`
 
-    const wrappedText = wrapText(ctx, text, startXPosition, startYPosition + textHeight/2, canvasResult.width - startXPosition, textHeight)
+    const wrappedText = wrapText(ctx, text, startXPosition, startYPosition + textHeight/2, canvas.width - startXPosition, textHeight)
 
     const TEXT_HEIGHT = wrappedText.length * textHeight
 
@@ -226,26 +240,26 @@ function writeText(startXPosition, startYPosition, textHeight, sideHeight){
         ctx.fillText(line[0], line[1], line[2] - TEXT_HEIGHT + sideHeight)
     })
 
-    drawLogo()
+    drawLogo(canvas, ctx)
 }
 
 /** 
  * Función que dibuja el logo en el canvas 
+ * @param {HTMLCanvasElement} canvas
+ * @param {CanvasRenderingContext2D} ctx
  */
-function drawLogo(){
+function drawLogo(canvas, ctx){
     const chkMostrarLogo = useInput('#chkMostrarLogo')
-    const [canvasResult, ctx] = useCanvas()
-
     const shouldDraw = chkMostrarLogo.checked
     
     if(shouldDraw){
         // Se crea tambien la imagen que es del logo y se pone chiquita arriba
-        createImg( './img/jebfire_mc.png', image => {
+        createImg( './public/img/jebfire_mc.png', image => {
             const LOGO_PADDING_PERCENTAGE = 2.5
             const LOGO_SIZE_PERCENTAGE = 10
 
-            const REAL_LOGO_PADDING = (LOGO_PADDING_PERCENTAGE * canvasResult.width) / 100
-            const REAL_LOGO_SIZE = (LOGO_SIZE_PERCENTAGE * canvasResult.width) / 100
+            const REAL_LOGO_PADDING = (LOGO_PADDING_PERCENTAGE * canvas.width) / 100
+            const REAL_LOGO_SIZE = (LOGO_SIZE_PERCENTAGE * canvas.width) / 100
 
             ctx.drawImage(image, REAL_LOGO_PADDING, REAL_LOGO_PADDING, REAL_LOGO_SIZE, REAL_LOGO_SIZE)
         })
@@ -289,33 +303,24 @@ function adjustEditor(){
 }
 
 /**
- * Ajusta si el consejo de que la imagen se puede ver diferente se muestra o no,'
- * dependiendo del tamaño del canvas
- */
-function adjustPreviewTooltip(){
-    if(useCanvasSide() <= 300){
-        element('.only-small').setAttribute('data-visible', "true")
-    }
-    else{
-        element('.only-small').setAttribute('data-visible', "false")
-    }
-}
-
-/**
  * Ajusta los elementos estaticos que necesitan cambiar manualmente su
  * anchura con un calculo de JS (canvas y divEditor)
+ * @param {boolean} withChange - Indicates if this is the first time updating, so the image isn't
+ * updated 
  */
-function updateStatics(){
+function updateStatics(withChange){
     setCanvasSide()
     adjustEditor()
-    adjustPreviewTooltip()
-    drawImage()
+    drawImage(withChange)
 }
 
 /**
  * Función para agregar los eventos a los elementos
  */
 function addEvents(){
+    // Crea el anuncio del copyright
+    setCopyright()
+
     // Añade eventos a la dropzone para depositar el archivo //
     /** @type {HTMLDivElement} */
     const dropzone = element('#dropzone')
@@ -350,18 +355,18 @@ function addEvents(){
     // Eventos para los botones para copiar color //
     useButton('#sameAsText').addEventListener('click', () => {
         copyColor('#dialogText', '#dialogColor')
-        drawImage()
+        drawImage(true)
     })
     useButton('#sameAsColor').addEventListener('click', () => {
         copyColor('#dialogColor', '#dialogText')
-        drawImage()
+        drawImage(true)
     })
 
     // Eventos para que se dibuje la imagen en cada cambio
-    useInput('#txtName').addEventListener('input', drawImage)
-    useInput('#dialogColor').addEventListener('change', drawImage)
-    useInput('#dialogText').addEventListener('change', drawImage)
-    useInput('#chkMostrarLogo').addEventListener('change', drawImage)
+    useInput('#txtName').addEventListener('input', () => drawImage(true))
+    useInput('#dialogColor').addEventListener('change', () => drawImage(true))
+    useInput('#dialogText').addEventListener('change', () => drawImage(true))
+    useInput('#chkMostrarLogo').addEventListener('change', () => drawImage(true))
     useButton('#btnDownload').addEventListener('click', downloadImg)
     useButton('#btnCloseModal').addEventListener('click', element('#modal').close)
 
@@ -378,8 +383,8 @@ function addEvents(){
     }) 
 
     // Al inicio y al actualizar ancho, que se actualice el ancho maximo
-    updateStatics()
-    window.addEventListener('resize', updateStatics)
+    updateStatics(false)
+    window.addEventListener('resize', () => updateStatics(changes))
 }
 
 document.addEventListener('DOMContentLoaded', addEvents)

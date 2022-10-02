@@ -18,6 +18,15 @@ export function element(selector){
 }
 
 /** 
+ * Atajo para document.querySelectorAll()
+ * @param {string} selector - Selector tipo CSS del elemento
+ * @returns {any}
+ */
+ export function allElements(selector){
+    return document.querySelectorAll(selector) ?? Exception(`There isn't any element ${selector} in DOM`)
+}
+
+/** 
  * Wraps HTML canvas text onto a canvas of fixed width
  * @param {CanvasRenderingContext2D} ctx - The context for the canvas we want to wrap text on
  * @param {string} text - The text we want to wrap.
@@ -88,8 +97,15 @@ export function isValidFile(file){
 
     const fileFormat = file.type.split('/')[0]
     if(!validFormats.includes(fileFormat)){
-        return [false, 'Tipo de archivo no compatible, agregue una imagen.']
+        return [false, 'Tipo de archivo no compatible, agregue un archivo de imagen.']
     }
 
     return [true, file.name]
+}
+
+/** 
+ * Puts the copyright announce at the end of the page 
+ */
+export function setCopyright(){
+    element('#copy').innerHTML = `Copyright &copy; ${new Date().getFullYear()} Enrique Barboza`
 }
