@@ -8,6 +8,7 @@
     <script src="./js/croppr.min.js"></script>
 
     <link rel="stylesheet" href="./css/pico.min.css">
+    <link rel="stylesheet" href="./css/pico.customize.css">
     <link rel="stylesheet" href="./css/croppr.min.css">
     <link rel="stylesheet" href="./css/style.css">
 
@@ -31,10 +32,21 @@
             <header>
                 Rellena los siguientes campos para generar tu cover:
             </header>
-            <label for="btnSelectPhoto">
-                1. Selecciona la foto:<span class="required"/>
-            </label>
-            <input type="file" id="btnSelectPhoto">
+
+            <fieldset id="widthReference">
+                <label>
+                    1. Selecciona la foto:<span class="required"/>
+                </label>
+                <div class="dropzone" id="dropzone">
+                    <div>
+                        <h2 class="m-0" id="lblDrop">Arrastra y suelta imágenes</h2>
+                        <div>O</div>
+                    </div>
+                    <button id="btnSelectPhoto">Selecciona tus archivos</button>
+                    <input type="file" id="fileDialog" hidden>
+                </div>  
+                <small id="errorTooltip" class="error-tooltip"></small>           
+            </fieldset>
 
             <label for="txtName">
                 2. Escribe el texto de la foto:<span class="required"/>
@@ -47,19 +59,21 @@
             <div class="grid">
                 <div>
                     <label for="dialogColor">
-                        3. Escoge el color de las tiras:<span class="required"/>
+                        3. Escoge el color de las barras:<span class="required"/>
                     </label>
                     <input type="color" id="dialogColor" value="#FFFFFF">
+                    <button id="sameAsText">Igual al texto</button>
                 </div>
                 <div>
                     <label for="dialogText">
                         4. Escoge el color del texto:<span class="required"/>
                     </label>
                     <input type="color" id="dialogText" value="#FFFFFF">
+                    <button id="sameAsColor">Igual a las barras</button>
                 </div>
             </div>
 
-            <fieldset class="avoidOverflow temporalHidden">
+            <fieldset class="temporalHidden">
                 <details>
                     <summary>
                         <em data-tooltip="Haz clic para abrir el editor">
@@ -71,11 +85,17 @@
                 <small>Abre para poder editar tu foto (agrandar/achicar/mover).</small>
             </fieldset>
 
-            <fieldset class="avoidOverflow temporalHidden">
+            <fieldset class="temporalHidden">
                 <label>
-                    6. Mira la vista previa:
+                    6. Mira una previsualización:
                 </label>
-                <canvas id="canvasPreview"></canvas>
+                <canvas id="canvasResult"></canvas>
+                <small class="only-small">
+                    En este dispositivo, la imagen superior puede verse diferente al resultado
+                    final, ya que tu pantalla tiene un ancho menor a 300px, por lo que la imagen
+                    final se agrandará hasta este tamaño, que es el minimo que requiere 
+                    Spotify.
+                </small>
             </fieldset>
 
             <fieldset class="temporalHidden">
@@ -95,9 +115,9 @@
                 </label>
                 <button type="button" id="btnDownload" disabled>DESCARGAR</button>
                 <small>
-                    Procura presionar este botón para descargar tu imagen en vez de guardar o copiar
-                    la imagen proporcionada arriba, ya que esta se encuentra en formato PNG, y las imágenes
-                    que subes a Spotify necesitan estar en formato JPG.
+                    Procura presionar este botón para descargar tu imagen en vez de guardar 
+                    o copiar la imagen proporcionada arriba, ya que esta se encuentra en 
+                    formato PNG, y las imágenes que subes a Spotify necesitan estar en formato JPG. Además de que, dependiendo de la imagen seleccionada, esta puede necesitar un cambio de tamaño.
                 </small>
             </footer>
         </article>
@@ -113,6 +133,6 @@
             </article>
         </dialog>
     </main>
-    <script src="./js/main.js"></script>
+    <script src="./js/main.js" type="module"></script>
 </body>
 </html>
